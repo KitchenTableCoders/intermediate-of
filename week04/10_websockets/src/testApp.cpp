@@ -51,7 +51,7 @@ void testApp::onIdle( ofxLibwebsockets::Event& args ){
 
 //--------------------------------------------------------------
 void testApp::onMessage( ofxLibwebsockets::Event& args ){
-    cout<<"got message "<<args.message<<endl;
+    //cout<<"got message "<<args.message<<endl;
     
     Json::Value json;
     Json::Reader reader;
@@ -61,6 +61,9 @@ void testApp::onMessage( ofxLibwebsockets::Event& args ){
     }
     
     
+    Line line;
+    line.unserialize( json );
+    lines.push_back(line);
 }
 
 //--------------------------------------------------------------

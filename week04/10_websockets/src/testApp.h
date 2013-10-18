@@ -34,6 +34,7 @@ public:
     }
     
     string unserialize(Json::Value line) {
+
         color.r = line["color"]["r"].asInt();
         color.g = line["color"]["g"].asInt();
         color.b = line["color"]["b"].asInt();
