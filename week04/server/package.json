@@ -1,0 +1,13 @@
+{
+  "name": "server",
+  "version": "0.0.0",
+  "description": "a simple web server",
+  "main": "app.js",
+  "repository": "",
+  "author": "Jeff",
+  "license": "BSD",
+  "dependencies": {
+    "ws": "~0.4.31",
+    "mongojs": "~0.9.6"
+  }
+}
