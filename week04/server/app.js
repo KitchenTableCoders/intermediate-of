@@ -16,31 +16,45 @@ var connectionString = "mongodb://kitchen:274morgan@ds049868.mongolab.com:49868/
 var db = mongojs(connectionString, ['lines']);
 
 
+// TO DO:  When a new line is saved, send it out to all of the clients
 
 
 console.log("starting web socket server.");
 
-wss.on('connection', function(ws) {
+var clients = [];
+wss.on('connection', function(client) {
 	console.log((new Date())+" new connection");
+	clients.push(client);
 
 	db.lines.find(function(err, docs) {
-		docs.forEach(function(doc){
-			console.log("sending "+util.inspect(doc));
-			ws.send( JSON.stringify(doc) );
+		docs.forEach(function(doc) {
+			client.send( JSON.stringify(doc) );
 		});
 	});
 
-	ws.on('message', function(message) {
-		//console.log('received: %s', message);
+
+	client.on('message', function(message) {
 		var doc = JSON.parse(message);
-		db.lines.save(doc, function(){
-			console.log("saved!")
+		db.lines.save(doc, function(doc){
+			clients.forEach(function(client){
+				if(clients.indexOf(client)!=-1) {
+					client.send(doc);
+				}
+			});
 		});
 	});
 
-	ws.on('error', function(err){
-		console.log("error: "+err);
-	})
+	client.on('close', function() {
+		var idx = clients.indexOf(client);
+		if(idx!=-1) {
+			console.log("removing client "+idx);
+			clients.splice(idx, 1);
+		}
+	});
 
-	//ws.send('something');
+	client.on('error', function(err){
+		console.log("error: "+err);
+	});
+
+	//client.send('something');
 });

@@ -12,9 +12,13 @@
 *.la
 *.a
 
+
+*.app
+*.xcuserstate
+*.sublime-workspace
+
 /week04/server/node_modules
 /week04/09_awesomium/bin/data/SessionData
-*.app
 
 
 # Xcode
@@ -36,4 +40,4 @@ profile
 DerivedData
 .idea/
 
-*.xcuserstate
+

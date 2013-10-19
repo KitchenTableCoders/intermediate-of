@@ -51,15 +51,13 @@ void testApp::onIdle( ofxLibwebsockets::Event& args ){
 
 //--------------------------------------------------------------
 void testApp::onMessage( ofxLibwebsockets::Event& args ){
-    //cout<<"got message "<<args.message<<endl;
-    
+
     Json::Value json;
     Json::Reader reader;
     if ( !reader.parse( args.message, json ) ) {
         std::cout  << "Failed to parse json\n" << reader.getFormattedErrorMessages();
         return;
     }
-    
     
     Line line;
     line.unserialize( json );
