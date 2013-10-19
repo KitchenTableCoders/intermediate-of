@@ -3,6 +3,11 @@
 //--------------------------------------------------------------
 void testApp::setup(){
   
+    char myhost[255];
+    gethostname(myhost, (size_t)sizeof(myhost));
+    hostname = string(myhost);
+    
+    
     ofxLibwebsockets::ClientOptions options = ofxLibwebsockets::defaultClientOptions();
     options.port = 8080;
     bool connected = client.connect( options );
@@ -59,9 +64,19 @@ void testApp::onMessage( ofxLibwebsockets::Event& args ){
         return;
     }
     
-    Line line;
-    line.unserialize( json );
-    lines.push_back(line);
+    if(json["route"]=="addline") {
+        ofLogNotice() << "received line";
+        Line line;
+        line.unserialize( json["line"] );
+        lines.push_back(line);
+    }
+    if(json["route"]=="removeline") {
+        for(int i=0; i<lines.size(); i++) {
+            if(lines[i]._id == json["id"].asString()) {
+                lines.erase(lines.begin()+i);
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -76,7 +91,16 @@ void testApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void testApp::keyReleased(int key){
-
+    if (key=='c') {
+        for(int i=0; i<lines.size(); i++) {
+            Json::Value message;
+            message["route"] = "removeline";
+            message["id"] = lines[i]._id;
+            
+            Json::StyledWriter writer;
+            client.send( writer.write( message ) );
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -96,10 +120,16 @@ void testApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
-    ofLogNotice() << drawing.serialize();
+    //ofLogNotice() << drawing.serialize();
     
-    client.send( drawing.serialize() );
-    lines.push_back( drawing );
+    Json::Value message;
+    message["route"] = "addline";
+    message["line"] = drawing.serialize();
+    
+    ofLogNotice() << "sending line";
+    Json::StyledWriter writer;
+    client.send( writer.write( message ) );
+    
     drawing.reset();
 }
 

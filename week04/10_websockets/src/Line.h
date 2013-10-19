@@ -12,6 +12,17 @@
 class Line {
 public:
     
+    Line() {
+       ofAddListener(ofEvents().mouseMoved, this, &Line::mouseMoved);
+        bMouseOver = false;
+    }
+    
+    void mouseMoved(ofMouseEventArgs& event){
+        if(verts.size()==0) return;
+        ofPoint& last = verts.back();
+        bMouseOver = ofDist(event.x, event.y, last.x, last.y) < 50;
+    }
+    
     void draw() {
         ofPushStyle();
         ofSetColor(color);
@@ -20,6 +31,10 @@ public:
         for(auto& vert : verts)
             ofVertex(vert.x, vert.y);
         ofEndShape();
+        
+        if(bMouseOver && verts.size()>0) {
+            ofDrawBitmapString(hostname, verts[verts.size()-1]);
+        }
         ofPopStyle();
     }
     
@@ -28,7 +43,7 @@ public:
         verts.clear();
     }
     
-    string serialize() {
+    Json::Value serialize() {
         char myhost[255];
         gethostname(myhost, (size_t)sizeof(myhost));
         
@@ -41,12 +56,12 @@ public:
             line["verts"][i]["x"] = (int)verts[i].x;
             line["verts"][i]["y"] = (int)verts[i].y;
         }
-        
-        Json::StyledWriter writer;
-        return writer.write( line );
+        return line;
     }
     
-    string unserialize(Json::Value line) {
+    void unserialize(Json::Value line) {
+        _id = line["_id"].asString();
+        hostname = line["hostname"].asString();
         color.r = line["color"]["r"].asInt();
         color.g = line["color"]["g"].asInt();
         color.b = line["color"]["b"].asInt();
@@ -57,6 +72,9 @@ public:
         }
     }
     
+    bool bMouseOver;
+    string _id;
+    string hostname;
     ofColor color;
     vector<ofPoint> verts;
 };
